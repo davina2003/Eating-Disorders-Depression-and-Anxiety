@@ -1,1 +1,63 @@
+library(tidyverse)
+library(psyntur)
+library(skimr)
+library(dplyr)
+
+#load in data
+library(haven)
+data <- read_sav("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Small data/Korea 2018 - Creativity, Mood, Sleep_January 27, 2019 _scrubbed_.sav")
+
+#select relevant variables
+data<- select(data, Age, bfineurotic, Gender, Race, howasian, edeqGlobal, gbi7down)
+
+data1<- na.omit(data)
+
+#separation of variables into dimensional and categorical
+dimensional<- select(data2, Age, bfineurotic, edeqGlobal, gbi7down)
+categorical<- select(data2, Gender, Race, howasian)
+
+#rename columns
+#renaming columns with rename
+dataset<- dimensional %>% 
+  rename(
+    neurotic= "bfineurotic",
+    "ed"= "edeqGlobal",
+    "depression"= "gbi7down")
+
+#describe dimensional data
+describe(data= dataset,
+         age_mean= mean(Age),
+         age_sd= sd(Age),
+         neurotic_mean= mean(neurotic),
+         neurotic_sd= sd(neurotic),
+         ed_mean= mean(ed),
+         ed_sd= sd(ed),
+         depression_mean= mean(depression),
+         depression_sd= sd(depression))
+
+#linear regression
+model<- lm(ed~depression, data=dataset)
+summary(model)
+confint(model)
+
+#covariates and moderators
+dataset<- data2 %>% 
+  rename(
+    neurotic= "bfineurotic",
+    "ed"= "edeqGlobal",
+    "depression"= "gbi7down")
+
+model<- lm(ed~depression, data=dataset)
+summary(model)
+confint(model)
+
+#add gender and age as covariates
+model1<- lm(ed ~ depression + Gender + Age, data = gender1)
+
+summary(model1)
+
+
+#add gender and age as moderators (interaction)
+model2 <- lm(ed ~ depression * Gender + depression * Age, data = gender1)
+summary(model2)
 
