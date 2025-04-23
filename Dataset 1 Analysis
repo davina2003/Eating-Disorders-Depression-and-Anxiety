@@ -1,1 +1,100 @@
+library(tidyverse)
+library(psyntur)
+library(skimr)
+library(dplyr)
+library(lmerTest)
+library(broom.mixed)
+
+#selecting columns with select
+select(mh, "Entity", "Year", "Eating disorders (%)", "Depression (%)", "Anxiety disorders (%)")
+
+#selecting columns with select- making new data set
+mh1<- select(mh,"Entity", "Year", "Eating disorders (%)", "Depression (%)", "Anxiety disorders (%)")
+
+#renaming columns with rename
+mh1<- df %>% 
+  rename(
+  ed= "Eating disorders (%)",
+  depression= "Depression (%)",
+  anxiety= "Anxiety disorders (%)")
+
+#descriptives
+describe(data= mh2,
+         mean_ed= mean(ed),
+         mean_depression= mean(depression),
+         mean_anx= mean(anxiety),
+         sd_ed= sd(ed),
+         sd_depression= sd(depression),
+         sd_anx= sd(anxiety))
+
+#descriptives over time
+df_summary <- mh2 %>%
+  group_by(Year) %>%
+  summarise(
+    mean_eating_disorders = mean(`ed`, na.rm = TRUE),
+    sd_eating_disorders = sd(`ed`, na.rm = TRUE),
+    mean_anxiety = mean(`anxiety`, na.rm = TRUE),
+    sd_anxiety = sd(`anxiety`, na.rm = TRUE),
+    mean_depression = mean(`depression`, na.rm = TRUE),
+    sd_depression = sd(`depression`, na.rm = TRUE)
+  )
+
+# this a more minimal model that does work
+m1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = mh2)
+summary(m1)
+confint(m1)
+
+# this a much more minimal model that also works
+m0 <- lmer(ed ~ depression + anxiety + (1|Year) + (1|Entity), data = mh2)
+summary(m0)
+confint(m0)
+
+# model comparison of m and m0
+anova(m0, m1)
+
+
+# this will obtain random effect
+tidy_ranef <- tidy(m1, effects = "ran_vals", conf.int = TRUE)
+
+ranef(m1)
+coef(m1)$Entity %>% arrange(depression)
+coef(m1)$Entity %>% arrange(anxiety)
+
+
+#regression by continents
+Africa <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/Africa.xlsx")
+# this a more minimal model that does work
+af1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = Africa)
+summary(af1)
+confint(af1)
+
+Asia <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/Asia.xlsx")
+as1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = Asia)
+summary(as1)
+confint(as1)
+
+Australia <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/Australia.xlsx")
+au1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = Australia)
+summary(au1)
+confint(au1)
+
+Europe <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/Europe.xlsx")
+eu1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = Europe)
+summary(eu1)
+confint(eu1)
+
+North_America <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/North America.xlsx")
+na1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = North_America)
+summary(na1)
+confint(na1)
+
+South_America <- read_excel("C:/Users/Hewlett Packard/OneDrive/Year 3/Research Project/Project/Big data/CONTINENTS/South America.xlsx")
+sa1 <- lmer(ed ~ depression + anxiety + (1|Year) + (depression + anxiety||Entity), data = South_America)
+summary(sa1)
+confint(sa1)
+
+
+
+
+
 
